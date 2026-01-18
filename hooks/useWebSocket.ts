@@ -186,9 +186,21 @@ export function useWebSocket(options: UseWebSocketOptions) {
     [sendMessage]
   );
 
+  const sendTypingIndicator = useCallback(
+    (targetUserId: string, conversationId: string, isTyping: boolean) => {
+      sendMessage({
+        type: isTyping ? "typing_start" : "typing_stop",
+        data: { targetUserId, conversationId },
+      });
+    },
+    [sendMessage]
+  );
+
   useEffect(() => {
     if (userId) {
       connect();
+    } else {
+      disconnect();
     }
 
     return () => {
@@ -205,6 +217,7 @@ export function useWebSocket(options: UseWebSocketOptions) {
     leaveRoom,
     sendChatMessage,
     sendTyping,
+    sendTypingIndicator,
     disconnect,
     reconnect: connect,
   };

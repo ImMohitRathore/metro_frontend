@@ -5,9 +5,11 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import ChatModal from '@/components/ChatModal';
 import { api } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMutation } from '@/hooks/useApi';
+import { useChat } from '@/hooks/useChat';
 
 interface DropdownValue {
   value: number;
@@ -44,6 +46,7 @@ interface UserProfile {
   hobbies: string;
   mobileNumber: string;
   emailAddress: string;
+  interestStatus?: string | null; // Interest status: 'accepted', 'pending', 'rejected', or null
 }
 
 export default function ProfilePage() {
@@ -55,6 +58,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sendingInterest, setSendingInterest] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   // Mutation for sending interest
   const { mutate: sendInterest } = useMutation(
@@ -73,6 +77,9 @@ export default function ProfilePage() {
     }
   );
 
+  // Chat hook
+  const { getOrCreateConversation } = useChat();
+
   // Helper function to get label from dropdown value object
   const getLabel = (dropdownValue: DropdownValue | undefined): string => {
     if (!dropdownValue) return 'N/A';
@@ -85,7 +92,9 @@ export default function ProfilePage() {
   const fetchProfile = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await api.get<UserProfile>(`/api/users/${userId}`);
+      // Include currentUserId in query params if user is logged in
+      const queryParam = user?.id ? `?currentUserId=${user.id}` : '';
+      const response = await api.get<UserProfile>(`/api/users/${userId}${queryParam}`);
 
       if (response.success && response.data) {
         setProfile(response.data);
@@ -98,7 +107,7 @@ export default function ProfilePage() {
     } finally {
       setLoading(false);
     }
-  }, [userId]);
+  }, [userId, user?.id]);
 
   useEffect(() => {
     fetchProfile();
@@ -365,23 +374,38 @@ export default function ProfilePage() {
 
               {/* Action Buttons */}
               <div className="mt-8 flex flex-col sm:flex-row gap-4">
-                <button
-                  onClick={() => {
-                    if (!user?.id) {
-                      router.push('/login');
-                      return;
-                    }
-                    setSendingInterest(true);
-                    sendInterest({
-                      fromUserId: user.id,
-                      toUserId: profile._id,
-                    }, 'POST');
-                  }}
-                  disabled={sendingInterest || !user?.id || user.id === profile._id}
-                  className="flex-1 bg-rose-600 text-white px-6 py-3 rounded-lg hover:bg-rose-700 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {sendingInterest ? 'Sending...' : 'Send Interest'}
-                </button>
+                {profile.interestStatus === 'accepted' ? (
+                  <button
+                    onClick={() => {
+                      if (!user?.id) {
+                        router.push('/login');
+                        return;
+                      }
+                      setIsChatOpen(true);
+                    }}
+                    className="flex-1 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors font-semibold"
+                  >
+                    Chat Now
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      if (!user?.id) {
+                        router.push('/login');
+                        return;
+                      }
+                      setSendingInterest(true);
+                      sendInterest({
+                        fromUserId: user.id,
+                        toUserId: profile._id,
+                      }, 'POST');
+                    }}
+                    disabled={sendingInterest || !user?.id || user.id === profile._id || profile.interestStatus === 'pending'}
+                    className="flex-1 bg-rose-600 text-white px-6 py-3 rounded-lg hover:bg-rose-700 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {sendingInterest ? 'Sending...' : profile.interestStatus === 'pending' ? 'Interest Pending' : 'Send Interest'}
+                  </button>
+                )}
                 <button className="flex-1 border-2 border-rose-600 text-rose-600 px-6 py-3 rounded-lg hover:bg-rose-50 transition-colors font-semibold">
                   Request Contact
                 </button>
@@ -389,6 +413,17 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
+
+        {/* Chat Modal */}
+        {profile && (
+          <ChatModal
+            isOpen={isChatOpen}
+            onClose={() => setIsChatOpen(false)}
+            otherUserId={profile._id}
+            otherUserName={profile.name}
+            otherUserPhoto={profile.photo}
+          />
+        )}
       </div>
     </ProtectedRoute>
   );

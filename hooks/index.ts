@@ -8,3 +8,9 @@ export type {
 } from "./useApi";
 export { useWebSocket } from "./useWebSocket";
 export { useNotifications } from "./useNotifications";
+export { useChat } from "./useChat";
+export { useConversations } from "./useConversations";
+export { useMessages } from "./useMessages";
+export { useTranslation } from "./useTranslation";
+export { useUnreadMessages } from "./useUnreadMessages";
+export type { Message, Conversation } from "./useChat";

@@ -2,7 +2,6 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { useWebSocket } from '@/hooks/useWebSocket';
 
 interface User {
   id: string;
@@ -43,24 +42,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(false);
   }, []);
 
-  // Setup WebSocket connection when user is authenticated
-  const { isConnected: wsConnected } = useWebSocket({
-    userId: user?.id || null,
-    onNotification: (notification) => {
-      console.log('New notification received:', notification);
-      // You can add a toast notification here or update notification state
-      // Optionally show a browser notification
-      if ('Notification' in window && Notification.permission === 'granted') {
-        new Notification(notification.title, {
-          body: notification.message,
-          icon: '/favicon.ico',
-        });
-      }
-    },
-    onError: (error) => {
-      console.error('WebSocket error:', error);
-    },
-  });
+  // WebSocket connection is now managed by WebSocketProvider
+  // We'll expose connection status through the context if needed
+  const [wsConnected, setWsConnected] = useState(false);
 
   const login = (userData: User) => {
     setUser(userData);

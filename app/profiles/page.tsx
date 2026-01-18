@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
+import ProfileFilters, { FilterState } from '@/components/ProfileFilters';
 
 interface DropdownValue {
   value: number;
@@ -53,19 +54,46 @@ export default function ProfilesPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
   const [limit] = useState(12);
+  const [filters, setFilters] = useState<FilterState>({});
+  const [searchQuery, setSearchQuery] = useState('');
 
+  // Reset to page 1 when filters or search change
+  useEffect(() => {
+    setPage(1);
+  }, [filters, searchQuery]);
+
+  // Fetch profiles when page, filters, or search changes
   useEffect(() => {
     fetchProfiles();
-  }, [page]);
+  }, [page, filters, searchQuery, user?.id]);
 
-  console.log("data:::" ,totalPages);
-  
-
-  const fetchProfiles = async () => {
+  const fetchProfiles = useCallback(async () => {
     try {
       setLoading(true);
-      // Backend returns: { success: true, data: UserProfile[], pagination: {...} }
-      // api.get returns ApiResponse<T>, so we type T as the backend response structure
+      setError(null);
+
+      // Build query parameters
+      const params = new URLSearchParams();
+      params.append('page', page.toString());
+      params.append('limit', limit.toString());
+      
+      // Add excludeUserId to exclude current user
+      if (user?.id) {
+        params.append('excludeUserId', user.id);
+      }
+
+      // Add search query
+      if (searchQuery.trim()) {
+        params.append('search', searchQuery.trim());
+      }
+
+      // Add filters
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          params.append(key, value.toString());
+        }
+      });
+
       const response = await api.get<{
         data: UserProfile[];
         pagination: {
@@ -74,40 +102,35 @@ export default function ProfilesPage() {
           total: number;
           pages: number;
         };
-      }>(`/api/users?page=${page}&limit=12`);
+      }>(`/api/users?${params.toString()}`);
 
       if (response.success && response.data) {
-        // response.data is { data: UserProfile[], pagination: {...} }
         const backendData = response.data as any;
-        console.log("backendData:::" ,backendData ,response);
-        // Get the profiles array - handle nested structure
         const profilesArray: UserProfile[] = 
           (backendData.data && Array.isArray(backendData.data)) 
             ? backendData.data 
             : (Array.isArray(backendData) ? backendData : []);
         
-        // Filter out current user's profile
-        const filteredProfiles = profilesArray.filter(
-          (profile) => profile && profile._id !== user?.id
-        );
-        setProfiles(filteredProfiles);
+        setProfiles(profilesArray);
         
-        // Get pagination info
         const pagination = response.pagination || {};
-        console.log("pagination:::" ,pagination.pages ,backendData);
         setTotalPages(pagination.pages || 1);
         setTotal(pagination.total || 0);
       } else {
         setProfiles([]);
+        setTotalPages(1);
+        setTotal(0);
       }
     } catch (err: any) {
       console.error('Error fetching profiles:', err);
       setError(err.message || 'Failed to fetch profiles');
       setProfiles([]);
+      setTotalPages(1);
+      setTotal(0);
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, limit, filters, searchQuery, user?.id]);
 
   // Helper function to get label from dropdown value object
   const getLabel = (dropdownValue: DropdownValue | number | undefined): string => {
@@ -169,13 +192,38 @@ export default function ProfilesPage() {
             </div>
           )}
 
-          {profiles.length === 0 && !loading ? (
-            <div className="text-center py-12">
-              <p className="text-gray-600 text-lg">No profiles found.</p>
+          {/* Filters and Results Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Filters Sidebar */}
+            <div className="lg:col-span-1">
+              <ProfileFilters
+                filters={filters}
+                onFiltersChange={setFilters}
+                onSearchChange={setSearchQuery}
+                searchQuery={searchQuery}
+              />
             </div>
-          ) : (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+
+            {/* Results */}
+            <div className="lg:col-span-3">
+
+              {profiles.length === 0 && !loading ? (
+                <div className="text-center py-12">
+                  <p className="text-gray-600 text-lg">No profiles found.</p>
+                  <p className="text-gray-500 text-sm mt-2">
+                    Try adjusting your filters or search criteria.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  {/* Results Count */}
+                  {total > 0 && (
+                    <div className="mb-4 text-sm text-gray-600">
+                      Found {total} profile{total !== 1 ? 's' : ''}
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 {profiles.map((profile) => (
                   <div
                     key={profile._id}
@@ -345,9 +393,11 @@ export default function ProfilesPage() {
                     Page {page} of {totalPages}
                   </div>
                 </div>
+                  )}
+                </>
               )}
-            </>
-          )}
+            </div>
+          </div>
         </div>
       </div>
     </ProtectedRoute>

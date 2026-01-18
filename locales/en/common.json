@@ -1,0 +1,64 @@
+{
+  "common": {
+    "welcome": "Welcome",
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Register",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "search": "Search",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  },
+  "auth": {
+    "email": "Email Address",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "name": "Name",
+    "mobileNumber": "Mobile Number",
+    "loginTitle": "Login to your account",
+    "registerTitle": "Create your account",
+    "forgotPassword": "Forgot Password?",
+    "dontHaveAccount": "Don't have an account?",
+    "alreadyHaveAccount": "Already have an account?"
+  },
+  "chat": {
+    "messages": "Messages",
+    "typeMessage": "Type a message...",
+    "send": "Send",
+    "noMessages": "No messages yet",
+    "noConversations": "No conversations yet",
+    "startConversation": "Start a conversation by clicking \"Chat Now\" on a profile",
+    "searchConversations": "Search conversations...",
+    "typing": "typing...",
+    "online": "Online",
+    "offline": "Offline"
+  },
+  "profile": {
+    "profile": "Profile",
+    "editProfile": "Edit Profile",
+    "viewProfile": "View Profile",
+    "sendInterest": "Send Interest",
+    "chatNow": "Chat Now",
+    "interestPending": "Interest Pending",
+    "noProfileFound": "No profile found"
+  },
+  "notifications": {
+    "notifications": "Notifications",
+    "noNotifications": "No notifications",
+    "markAllRead": "Mark all as read",
+    "deleteAll": "Delete all",
+    "newNotification": "New notification"
+  },
+  "navbar": {
+    "home": "Home",
+    "browseProfiles": "Browse Profiles",
+    "messages": "Messages",
+    "notifications": "Notifications",
+    "about": "About"
+  }
+}

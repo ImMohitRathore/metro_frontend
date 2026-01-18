@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useApi } from "./useApi";
-import { useWebSocket } from "./useWebSocket";
+import { useWebSocketContext } from "@/contexts/WebSocketContext";
 
 interface Notification {
   _id: string;
@@ -41,16 +41,21 @@ export function useNotifications(userId: string | null) {
     immediate: !!userId,
   });
 
-  // Setup WebSocket to listen for new notifications
-  useWebSocket({
-    userId,
-    onNotification: (notification) => {
-      // Refresh stats when new notification arrives
-      if (userId) {
+  // Subscribe to WebSocket notifications via centralized context
+  const { subscribe } = useWebSocketContext();
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const unsubscribe = subscribe((message) => {
+      if (message.type === "notification") {
+        // Refresh stats when new notification arrives
         refetchStats();
       }
-    },
-  });
+    });
+
+    return unsubscribe;
+  }, [userId, subscribe, refetchStats]);
 
   useEffect(() => {
     if (statsData?.data?.unread !== undefined) {

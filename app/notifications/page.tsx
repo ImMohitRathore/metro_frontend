@@ -2,12 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
-import { useApi, useMutation } from '@/hooks/useApi';
-import { useWebSocket } from '@/hooks/useWebSocket';
+import { useApi } from '@/hooks/useApi';
+import { useWebSocketContext } from '@/contexts/WebSocketContext';
 
 interface Notification {
   _id: string;
@@ -16,7 +15,13 @@ interface Notification {
   title: string;
   message: string;
   status: 'unread' | 'read' | 'archived';
-  metadata?: any;
+  metadata?: {
+    interestId?: string;
+    fromUserId?: string;
+    fromUserName?: string;
+    profileId?: string;
+    [key: string]: unknown;
+  };
   link?: string;
   readAt?: string;
   createdAt: string;
@@ -59,14 +64,21 @@ export default function NotificationsPage() {
     }
   }, [filter, page, user?.id, refetch]);
 
-  // Setup WebSocket for real-time notifications
-  useWebSocket({
-    userId: user?.id || null,
-    onNotification: (notification) => {
-      // Refresh notifications when new one arrives
-      refetch();
-    },
-  });
+  // Subscribe to WebSocket notifications via centralized context
+  const { subscribe } = useWebSocketContext();
+
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const unsubscribe = subscribe((message) => {
+      if (message.type === 'notification') {
+        // Refresh notifications when new one arrives
+        refetch();
+      }
+    });
+
+    return unsubscribe;
+  }, [user?.id, subscribe, refetch]);
 
   const handleMarkAsRead = async (notificationId: string) => {
     try {
@@ -99,6 +111,20 @@ export default function NotificationsPage() {
       } catch (error) {
         console.error('Error deleting notification:', error);
       }
+    }
+  };
+
+  const handleInterestStatusUpdate = async (notificationId: string, interestId: string, status: 'accepted' | 'rejected') => {
+    try {
+      const { api } = await import('@/lib/api');
+      // Update interest status
+      await api.patch(`/api/interests/${interestId}/status`, { status });
+      // Delete the notification after accepting/rejecting
+      await api.delete(`/api/notifications/${notificationId}`);
+      await refetch();
+    } catch (error) {
+      console.error(`Error ${status === 'accepted' ? 'accepting' : 'rejecting'} interest:`, error);
+      alert(`Failed to ${status === 'accepted' ? 'accept' : 'reject'} interest. Please try again.`);
     }
   };
 
@@ -173,7 +199,8 @@ export default function NotificationsPage() {
     if (days < 7) return `${days}d ago`;
     return date.toLocaleDateString();
   };
-
+  console.log("data:::::" , data);
+  
   const notifications = data || [];
   const unreadCount = data?.unreadCount || 0;
   const pagination = data?.pagination;
@@ -324,29 +351,63 @@ export default function NotificationsPage() {
                       </div>
 
                       {/* Actions */}
-                      <div className="flex-shrink-0 flex gap-2">
-                        {notification.status === 'unread' && (
+                      <div className="flex-shrink-0 flex flex-col gap-2 items-end">
+                        {/* Interest Actions - Show for interest notifications with interestId */}
+                        {notification.type === 'interest' && notification.metadata?.interestId && (
+                          <div className="flex gap-2 mb-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const interestId = notification.metadata?.interestId;
+                                if (interestId) {
+                                  handleInterestStatusUpdate(notification._id, interestId, 'accepted');
+                                }
+                              }}
+                              className="px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded-lg hover:bg-green-700 transition-colors"
+                              title="Accept Interest"
+                            >
+                              Accept
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const interestId = notification.metadata?.interestId;
+                                if (interestId) {
+                                  handleInterestStatusUpdate(notification._id, interestId, 'rejected');
+                                }
+                              }}
+                              className="px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded-lg hover:bg-red-700 transition-colors"
+                              title="Reject Interest"
+                            >
+                              Reject
+                            </button>
+                          </div>
+                        )}
+                        
+                        <div className="flex gap-2">
+                          {notification.status === 'unread' && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleMarkAsRead(notification._id);
+                              }}
+                              className="text-gray-400 hover:text-gray-600 text-sm"
+                              title="Mark as read"
+                            >
+                              ✓
+                            </button>
+                          )}
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleMarkAsRead(notification._id);
+                              handleDelete(notification._id);
                             }}
-                            className="text-gray-400 hover:text-gray-600 text-sm"
-                            title="Mark as read"
+                            className="text-gray-400 hover:text-red-600 text-sm"
+                            title="Delete"
                           >
-                            ✓
+                            ×
                           </button>
-                        )}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDelete(notification._id);
-                          }}
-                          className="text-gray-400 hover:text-red-600 text-sm"
-                          title="Delete"
-                        >
-                          ×
-                        </button>
+                        </div>
                       </div>
                     </div>
                   </div>

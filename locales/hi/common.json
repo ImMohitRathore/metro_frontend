@@ -1,0 +1,64 @@
+{
+  "common": {
+    "welcome": "स्वागत है",
+    "login": "लॉगिन",
+    "logout": "लॉगआउट",
+    "register": "रजिस्टर",
+    "submit": "सबमिट",
+    "cancel": "रद्द करें",
+    "save": "सेव",
+    "delete": "हटाएं",
+    "edit": "संपादित करें",
+    "search": "खोजें",
+    "loading": "लोड हो रहा है...",
+    "error": "त्रुटि",
+    "success": "सफल"
+  },
+  "auth": {
+    "email": "ईमेल पता",
+    "password": "पासवर्ड",
+    "confirmPassword": "पासवर्ड की पुष्टि करें",
+    "name": "नाम",
+    "mobileNumber": "मोबाइल नंबर",
+    "loginTitle": "अपने खाते में लॉगिन करें",
+    "registerTitle": "अपना खाता बनाएं",
+    "forgotPassword": "पासवर्ड भूल गए?",
+    "dontHaveAccount": "खाता नहीं है?",
+    "alreadyHaveAccount": "पहले से खाता है?"
+  },
+  "chat": {
+    "messages": "संदेश",
+    "typeMessage": "संदेश टाइप करें...",
+    "send": "भेजें",
+    "noMessages": "अभी तक कोई संदेश नहीं",
+    "noConversations": "अभी तक कोई बातचीत नहीं",
+    "startConversation": "प्रोफ़ाइल पर \"अभी चैट करें\" पर क्लिक करके बातचीत शुरू करें",
+    "searchConversations": "बातचीत खोजें...",
+    "typing": "टाइप कर रहे हैं...",
+    "online": "ऑनलाइन",
+    "offline": "ऑफ़लाइन"
+  },
+  "profile": {
+    "profile": "प्रोफ़ाइल",
+    "editProfile": "प्रोफ़ाइल संपादित करें",
+    "viewProfile": "प्रोफ़ाइल देखें",
+    "sendInterest": "रुचि भेजें",
+    "chatNow": "अभी चैट करें",
+    "interestPending": "रुचि लंबित",
+    "noProfileFound": "कोई प्रोफ़ाइल नहीं मिली"
+  },
+  "notifications": {
+    "notifications": "सूचनाएं",
+    "noNotifications": "कोई सूचना नहीं",
+    "markAllRead": "सभी को पढ़ा हुआ मार्क करें",
+    "deleteAll": "सभी हटाएं",
+    "newNotification": "नई सूचना"
+  },
+  "navbar": {
+    "home": "होम",
+    "browseProfiles": "प्रोफ़ाइल ब्राउज़ करें",
+    "messages": "संदेश",
+    "notifications": "सूचनाएं",
+    "about": "के बारे में"
+  }
+}
