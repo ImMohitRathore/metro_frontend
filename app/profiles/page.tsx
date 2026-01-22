@@ -56,6 +56,7 @@ export default function ProfilesPage() {
   const [limit] = useState(12);
   const [filters, setFilters] = useState<FilterState>({});
   const [searchQuery, setSearchQuery] = useState('');
+  const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
 
   // Reset to page 1 when filters or search change
   useEffect(() => {
@@ -105,7 +106,15 @@ export default function ProfilesPage() {
       }>(`/api/users?${params.toString()}`);
 
       if (response.success && response.data) {
-        const backendData = response.data as any;
+        const backendData = response.data as {
+          data?: UserProfile[];
+          pagination?: {
+            page: number;
+            limit: number;
+            total: number;
+            pages: number;
+          };
+        };
         const profilesArray: UserProfile[] = 
           (backendData.data && Array.isArray(backendData.data)) 
             ? backendData.data 
@@ -113,17 +122,24 @@ export default function ProfilesPage() {
         
         setProfiles(profilesArray);
         
-        const pagination = response.pagination || {};
+        const pagination = backendData.pagination || { pages: 1, total: 0 };
         setTotalPages(pagination.pages || 1);
         setTotal(pagination.total || 0);
+        console.log("backendData::::", response);
+        
+        // hasActiveSubscription comes from response object, not from response.data
+        const responseWithSubscription = response as typeof response & { hasActiveSubscription?: boolean };
+        setHasActiveSubscription(responseWithSubscription.hasActiveSubscription || false);
       } else {
         setProfiles([]);
         setTotalPages(1);
         setTotal(0);
+        setHasActiveSubscription(false);
       }
-    } catch (err: any) {
-      console.error('Error fetching profiles:', err);
-      setError(err.message || 'Failed to fetch profiles');
+      } catch (err: unknown) {
+        console.error('Error fetching profiles:', err);
+        const errorMessage = err instanceof Error ? err.message : 'Failed to fetch profiles';
+        setError(errorMessage);
       setProfiles([]);
       setTotalPages(1);
       setTotal(0);
@@ -192,6 +208,28 @@ export default function ProfilesPage() {
             </div>
           )}
 
+          {/* Subscription Banner for Free Users */}
+          {!hasActiveSubscription && user && (
+            <div className="bg-gradient-to-r from-rose-500 to-pink-500 rounded-lg p-6 mb-6 shadow-lg">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold text-white mb-2">
+                    🔒 Limited Access - View Only 10 Profiles
+                  </h3>
+                  <p className="text-white text-sm">
+                    Subscribe now to view unlimited profiles and connect with more matches!
+                  </p>
+                </div>
+                <Link
+                  href="/subscription"
+                  className="bg-white text-rose-600 px-6 py-3 rounded-lg font-semibold hover:bg-rose-50 transition-colors whitespace-nowrap"
+                >
+                  View Plans
+                </Link>
+              </div>
+            </div>
+          )}
+
           {/* Filters and Results Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {/* Filters Sidebar */}
@@ -218,8 +256,15 @@ export default function ProfilesPage() {
                 <>
                   {/* Results Count */}
                   {total > 0 && (
-                    <div className="mb-4 text-sm text-gray-600">
-                      Found {total} profile{total !== 1 ? 's' : ''}
+                    <div className="mb-4 flex items-center justify-between">
+                      <div className="text-sm text-gray-600">
+                        Found {total} profile{total !== 1 ? 's' : ''}
+                        {!hasActiveSubscription && total >= 10 && (
+                          <span className="ml-2 text-rose-600 font-semibold">
+                            (Showing first 10 - Subscribe for unlimited access)
+                          </span>
+                        )}
+                      </div>
                     </div>
                   )}
 

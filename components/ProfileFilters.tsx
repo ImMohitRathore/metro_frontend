@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { api } from '@/lib/api';
+import CustomFormField from './CustomFormField';
 
 interface DropdownOption {
   _id: string;
@@ -239,15 +240,15 @@ export default function ProfileFilters({
           <div className="space-y-4">
             {/* Search */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Search by Name, Mobile, or Email
-              </label>
-              <input
+              <CustomFormField
+                id="search"
+                name="search"
+                label="Search by Name, Mobile, or Email"
                 type="text"
                 value={localSearchQuery}
-                onChange={(e) => setLocalSearchQuery(e.target.value)}
                 placeholder="Enter name, mobile, or email..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
+                onChange={(name, value) => setLocalSearchQuery(value as string)}
+                onTextChange={(e) => setLocalSearchQuery(e.target.value)}
               />
               {localSearchQuery !== searchQuery && (
                 <p className="mt-1 text-xs text-gray-500">Searching...</p>
@@ -255,245 +256,224 @@ export default function ProfileFilters({
             </div>
 
             {/* Gender */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Gender
-              </label>
-              <select
-                value={filters.gender || ''}
-                onChange={(e) => handleFilterChange('gender', e.target.value ? parseInt(e.target.value) : undefined)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
-              >
-                <option value="">All</option>
-                {dropdowns.genders.map((gender) => (
-                  <option key={gender._id} value={gender.value}>
-                    {gender.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <CustomFormField
+              id="gender"
+              name="gender"
+              label="Gender"
+              type="select"
+              value={filters.gender || ''}
+              options={[
+                { value: '', label: 'All' },
+                ...dropdowns.genders.map((gender) => ({
+                  value: gender.value,
+                  label: gender.label,
+                })),
+              ]}
+              placeholder="Select Gender"
+              onChange={(name, value) => handleFilterChange('gender', value === '' ? undefined : Number(value))}
+            />
 
             {/* Age Range */}
             <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Min Age
-                </label>
-                <input
-                  type="number"
-                  min="18"
-                  max="100"
-                  value={filters.minAge || ''}
-                  onChange={(e) => handleFilterChange('minAge', e.target.value ? parseInt(e.target.value) : undefined)}
-                  placeholder="18"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Max Age
-                </label>
-                <input
-                  type="number"
-                  min="18"
-                  max="100"
-                  value={filters.maxAge || ''}
-                  onChange={(e) => handleFilterChange('maxAge', e.target.value ? parseInt(e.target.value) : undefined)}
-                  placeholder="100"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
-                />
-              </div>
+              <CustomFormField
+                id="minAge"
+                name="minAge"
+                label="Min Age"
+                type="number"
+                value={filters.minAge || ''}
+                placeholder="18"
+                onChange={(name, value) => handleFilterChange('minAge', value === '' ? undefined : Number(value))}
+                onTextChange={(e) => handleFilterChange('minAge', e.target.value ? parseInt(e.target.value) : undefined)}
+              />
+              <CustomFormField
+                id="maxAge"
+                name="maxAge"
+                label="Max Age"
+                type="number"
+                value={filters.maxAge || ''}
+                placeholder="100"
+                onChange={(name, value) => handleFilterChange('maxAge', value === '' ? undefined : Number(value))}
+                onTextChange={(e) => handleFilterChange('maxAge', e.target.value ? parseInt(e.target.value) : undefined)}
+              />
             </div>
 
             {/* Height */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Height
-              </label>
-              <select
-                value={filters.height || ''}
-                onChange={(e) => handleFilterChange('height', e.target.value ? parseInt(e.target.value) : undefined)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
-              >
-                <option value="">All</option>
-                {dropdowns.heights.map((height) => (
-                  <option key={height._id} value={height.value}>
-                    {height.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <CustomFormField
+              id="height"
+              name="height"
+              label="Height"
+              type="select"
+              value={filters.height || ''}
+              options={[
+                { value: '', label: 'All' },
+                ...dropdowns.heights.map((height) => ({
+                  value: height.value,
+                  label: height.label,
+                })),
+              ]}
+              placeholder="Select Height"
+              onChange={(name, value) => handleFilterChange('height', value === '' ? undefined : Number(value))}
+            />
 
             {/* Marital Status */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Marital Status
-              </label>
-              <select
-                value={filters.maritalStatus || ''}
-                onChange={(e) => handleFilterChange('maritalStatus', e.target.value ? parseInt(e.target.value) : undefined)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
-              >
-                <option value="">All</option>
-                {dropdowns.maritalStatuses.map((status) => (
-                  <option key={status._id} value={status.value}>
-                    {status.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <CustomFormField
+              id="maritalStatus"
+              name="maritalStatus"
+              label="Marital Status"
+              type="select"
+              value={filters.maritalStatus || ''}
+              options={[
+                { value: '', label: 'All' },
+                ...dropdowns.maritalStatuses.map((status) => ({
+                  value: status.value,
+                  label: status.label,
+                })),
+              ]}
+              placeholder="Select Marital Status"
+              onChange={(name, value) => handleFilterChange('maritalStatus', value === '' ? undefined : Number(value))}
+            />
 
             {/* Religion */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Religion
-              </label>
-              <select
-                value={filters.religion || ''}
-                onChange={(e) => handleFilterChange('religion', e.target.value ? parseInt(e.target.value) : undefined)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
-              >
-                <option value="">All</option>
-                {dropdowns.religions.map((religion) => (
-                  <option key={religion._id} value={religion.value}>
-                    {religion.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <CustomFormField
+              id="religion"
+              name="religion"
+              label="Religion"
+              type="select"
+              value={filters.religion || ''}
+              options={[
+                { value: '', label: 'All' },
+                ...dropdowns.religions.map((religion) => ({
+                  value: religion.value,
+                  label: religion.label,
+                })),
+              ]}
+              placeholder="Select Religion"
+              onChange={(name, value) => handleFilterChange('religion', value === '' ? undefined : Number(value))}
+            />
 
             {/* Caste */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Caste
-              </label>
-              <select
-                value={filters.caste || ''}
-                onChange={(e) => handleFilterChange('caste', e.target.value ? parseInt(e.target.value) : undefined)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
-              >
-                <option value="">All</option>
-                {dropdowns.castes.map((caste) => (
-                  <option key={caste._id} value={caste.value}>
-                    {caste.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <CustomFormField
+              id="caste"
+              name="caste"
+              label="Caste"
+              type="select"
+              value={filters.caste || ''}
+              options={[
+                { value: '', label: 'All' },
+                ...dropdowns.castes.map((caste) => ({
+                  value: caste.value,
+                  label: caste.label,
+                })),
+              ]}
+              placeholder="Select Caste"
+              onChange={(name, value) => handleFilterChange('caste', value === '' ? undefined : Number(value))}
+            />
 
             {/* Qualification */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Qualification
-              </label>
-              <select
-                value={filters.qualification || ''}
-                onChange={(e) => handleFilterChange('qualification', e.target.value ? parseInt(e.target.value) : undefined)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
-              >
-                <option value="">All</option>
-                {dropdowns.qualifications.map((qual) => (
-                  <option key={qual._id} value={qual.value}>
-                    {qual.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <CustomFormField
+              id="qualification"
+              name="qualification"
+              label="Qualification"
+              type="select"
+              value={filters.qualification || ''}
+              options={[
+                { value: '', label: 'All' },
+                ...dropdowns.qualifications.map((qual) => ({
+                  value: qual.value,
+                  label: qual.label,
+                })),
+              ]}
+              placeholder="Select Qualification"
+              onChange={(name, value) => handleFilterChange('qualification', value === '' ? undefined : Number(value))}
+            />
 
             {/* State */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                State
-              </label>
-              <select
-                value={filters.state || ''}
-                onChange={(e) => {
-                  const stateValue = e.target.value ? parseInt(e.target.value) : undefined;
-                  handleFilterChange('state', stateValue);
-                  // Clear city when state changes
-                  if (!stateValue) {
-                    handleFilterChange('city', undefined);
-                  }
-                }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
-              >
-                <option value="">All</option>
-                {dropdowns.states.map((state) => (
-                  <option key={state._id} value={state.value}>
-                    {state.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <CustomFormField
+              id="state"
+              name="state"
+              label="State"
+              type="select"
+              value={filters.state || ''}
+              options={[
+                { value: '', label: 'All' },
+                ...dropdowns.states.map((state) => ({
+                  value: state.value,
+                  label: state.label,
+                })),
+              ]}
+              placeholder="Select State"
+              onChange={(name, value) => {
+                const stateValue = value === '' ? undefined : Number(value);
+                handleFilterChange('state', stateValue);
+                // Clear city when state changes
+                if (!stateValue) {
+                  handleFilterChange('city', undefined);
+                }
+              }}
+            />
 
             {/* City */}
             {filters.state && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  City
-                </label>
-                <select
-                  value={filters.city || ''}
-                  onChange={(e) => handleFilterChange('city', e.target.value ? parseInt(e.target.value) : undefined)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
-                  disabled={!filters.state || dropdowns.cities.length === 0}
-                >
-                  <option value="">All</option>
-                  {dropdowns.cities.map((city) => (
-                    <option key={city._id} value={city.value}>
-                      {city.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <CustomFormField
+                id="city"
+                name="city"
+                label="City"
+                type="select"
+                value={filters.city || ''}
+                options={[
+                  { value: '', label: 'All' },
+                  ...dropdowns.cities.map((city) => ({
+                    value: city.value,
+                    label: city.label,
+                  })),
+                ]}
+                placeholder="Select City"
+                onChange={(name, value) => handleFilterChange('city', value === '' ? undefined : Number(value))}
+                disabled={!filters.state || dropdowns.cities.length === 0}
+              />
             )}
 
             {/* Food Preference */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Food Preference
-              </label>
-              <select
-                value={filters.foodPreference || ''}
-                onChange={(e) => handleFilterChange('foodPreference', e.target.value ? parseInt(e.target.value) : undefined)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
-              >
-                <option value="">All</option>
-                {dropdowns.diets.map((diet) => (
-                  <option key={diet._id} value={diet.value}>
-                    {diet.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <CustomFormField
+              id="foodPreference"
+              name="foodPreference"
+              label="Food Preference"
+              type="select"
+              value={filters.foodPreference || ''}
+              options={[
+                { value: '', label: 'All' },
+                ...dropdowns.diets.map((diet) => ({
+                  value: diet.value,
+                  label: diet.label,
+                })),
+              ]}
+              placeholder="Select Food Preference"
+              onChange={(name, value) => handleFilterChange('foodPreference', value === '' ? undefined : Number(value))}
+            />
 
             {/* Occupation */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Occupation
-              </label>
-              <input
-                type="text"
-                value={filters.occupation || ''}
-                onChange={(e) => handleFilterChange('occupation', e.target.value)}
-                placeholder="Enter occupation..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
-              />
-            </div>
+            <CustomFormField
+              id="occupation"
+              name="occupation"
+              label="Occupation"
+              type="text"
+              value={filters.occupation || ''}
+              placeholder="Enter occupation..."
+              onChange={(name, value) => handleFilterChange('occupation', value as string)}
+              onTextChange={(e) => handleFilterChange('occupation', e.target.value)}
+            />
 
             {/* Annual Income */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Annual Income
-              </label>
-              <input
-                type="text"
-                value={filters.annualIncome || ''}
-                onChange={(e) => handleFilterChange('annualIncome', e.target.value)}
-                placeholder="Enter income range..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
-              />
-            </div>
+            <CustomFormField
+              id="annualIncome"
+              name="annualIncome"
+              label="Annual Income"
+              type="text"
+              value={filters.annualIncome || ''}
+              placeholder="Enter income range..."
+              onChange={(name, value) => handleFilterChange('annualIncome', value as string)}
+              onTextChange={(e) => handleFilterChange('annualIncome', e.target.value)}
+            />
           </div>
         )}
       </div>

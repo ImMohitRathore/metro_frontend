@@ -94,14 +94,30 @@ export default function Navbar() {
                     </span>
                   )}
                 </Link>
-                {user?.photo && (
-                  <img
-                    src={user.photo}
-                    alt={user.name}
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
+                {user?.photo ? (
+                  <Link href="/profile" className="cursor-pointer">
+                    <img
+                      src={user.photo}
+                      alt={user.name}
+                      className="w-8 h-8 rounded-full object-cover hover:ring-2 hover:ring-rose-500 transition-all"
+                    />
+                  </Link>
+                ) : (
+                  <Link
+                    href="/profile"
+                    className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center hover:bg-gray-400 transition-colors"
+                  >
+                    <span className="text-sm text-gray-600 font-semibold">
+                      {user?.name?.charAt(0).toUpperCase() || 'U'}
+                    </span>
+                  </Link>
                 )}
-                <span className="text-gray-700">{user?.name}</span>
+                <Link
+                  href="/profile"
+                  className="text-gray-700 hover:text-rose-600 transition-colors cursor-pointer"
+                >
+                  {user?.name}
+                </Link>
                 <button
                   onClick={logout}
                   className="bg-rose-600 text-white px-4 py-2 rounded-lg hover:bg-rose-700 transition-colors"

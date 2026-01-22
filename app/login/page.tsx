@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
+import CustomFormField from '@/components/CustomFormField';
 import { useMutation } from '@/hooks/useApi';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -114,49 +115,39 @@ export default function Login() {
 
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-4">
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                  Email Address
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={formData.email}
-                  onChange={handleChange}
-                  className={`mt-1 appearance-none relative block w-full px-3 py-2 border ${
-                    errors.email ? 'border-red-300' : 'border-gray-300'
-                  } placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-rose-500 focus:border-rose-500 focus:z-10 sm:text-sm`}
-                  placeholder="Enter your email"
-                />
-                {errors.email && (
-                  <p className="mt-1 text-sm text-red-600">{errors.email}</p>
-                )}
-              </div>
+              <CustomFormField
+                id="email"
+                name="email"
+                label="Email Address"
+                type="email"
+                value={formData.email}
+                placeholder="Enter your email"
+                onChange={(name, value) => {
+                  setFormData(prev => ({ ...prev, [name]: value }));
+                  if (errors.email) {
+                    setErrors(prev => ({ ...prev, email: undefined }));
+                  }
+                }}
+                onTextChange={handleChange}
+                error={errors.email}
+              />
 
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                  Password
-                </label>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                  value={formData.password}
-                  onChange={handleChange}
-                  className={`mt-1 appearance-none relative block w-full px-3 py-2 border ${
-                    errors.password ? 'border-red-300' : 'border-gray-300'
-                  } placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-rose-500 focus:border-rose-500 focus:z-10 sm:text-sm`}
-                  placeholder="Enter your password"
-                />
-                {errors.password && (
-                  <p className="mt-1 text-sm text-red-600">{errors.password}</p>
-                )}
-              </div>
+              <CustomFormField
+                id="password"
+                name="password"
+                label="Password"
+                type="password"
+                value={formData.password}
+                placeholder="Enter your password"
+                onChange={(name, value) => {
+                  setFormData(prev => ({ ...prev, [name]: value }));
+                  if (errors.password) {
+                    setErrors(prev => ({ ...prev, password: undefined }));
+                  }
+                }}
+                onTextChange={handleChange}
+                error={errors.password}
+              />
             </div>
 
             <div className="flex items-center justify-between">

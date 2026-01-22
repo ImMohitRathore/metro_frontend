@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import CustomFormField from '@/components/CustomFormField';
 import { useAuth } from '@/contexts/AuthContext';
 import { useConversations } from '@/hooks/useConversations';
 import { Conversation } from '@/hooks/useChat';
@@ -70,12 +71,15 @@ export default function ChatPage() {
 
             {/* Search */}
             <div className="px-6 py-4 border-b border-gray-200">
-              <input
+              <CustomFormField
+                id="search"
+                name="search"
                 type="text"
-                placeholder={t('chat.searchConversations')}
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
+                placeholder={t('chat.searchConversations')}
+                onChange={(name, value) => setSearchQuery(value as string)}
+                onTextChange={(e) => setSearchQuery(e.target.value)}
+                className="mb-0"
               />
             </div>
 
