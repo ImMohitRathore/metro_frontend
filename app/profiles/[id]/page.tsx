@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -52,8 +52,13 @@ interface UserProfile {
 export default function ProfilePage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user } = useAuth();
   const userId = params.id as string;
+  
+  // Check if we should return to admin dashboard (only if returnTo parameter is set)
+  const returnTo = searchParams.get('returnTo');
+  const isFromAdmin = returnTo === 'admin';
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -158,10 +163,10 @@ export default function ProfilePage() {
             <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
               <p className="text-red-600 text-lg mb-4">{error || 'Profile not found'}</p>
               <Link
-                href="/profiles"
+                href={isFromAdmin ? "/admin" : "/profiles"}
                 className="inline-block bg-rose-600 text-white px-6 py-2 rounded-lg hover:bg-rose-700 transition-colors"
               >
-                Back to Profiles
+                {isFromAdmin ? "Back to Admin Dashboard" : "Back to Profiles"}
               </Link>
             </div>
           </div>
@@ -178,7 +183,7 @@ export default function ProfilePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Back Button */}
           <Link
-            href="/profiles"
+            href={isFromAdmin ? "/admin" : "/profiles"}
             className="inline-flex items-center text-rose-600 hover:text-rose-700 mb-6 transition-colors"
           >
             <svg
@@ -194,7 +199,7 @@ export default function ProfilePage() {
                 d="M15 19l-7-7 7-7"
               />
             </svg>
-            Back to Profiles
+            {isFromAdmin ? "Back to Admin Dashboard" : "Back to Profiles"}
           </Link>
 
           <div className="bg-white rounded-lg shadow-lg overflow-hidden">

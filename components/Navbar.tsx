@@ -31,12 +31,22 @@ export default function Navbar() {
             </Link>
             {isAuthenticated && (
               <>
-                <Link
-                  href="/profiles"
-                  className="text-gray-700 hover:text-rose-600 transition-colors"
-                >
-                  {t('navbar.browseProfiles')}
-                </Link>
+                {user?.role === 'admin' && (
+                  <Link
+                    href="/admin"
+                    className="text-gray-700 hover:text-rose-600 transition-colors font-semibold"
+                  >
+                    Admin
+                  </Link>
+                )}
+                {user?.role !== 'admin' && (
+                  <Link
+                    href="/profiles"
+                    className="text-gray-700 hover:text-rose-600 transition-colors"
+                  >
+                    {t('navbar.browseProfiles')}
+                  </Link>
+                )}
                 <Link
                   href="/chat"
                   className="relative text-gray-700 hover:text-rose-600 transition-colors"
